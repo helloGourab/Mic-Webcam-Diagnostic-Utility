@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mic & Webcam Diagnostic Utility • Zero-Telemetry Hardware Tester</title>
+  <meta name="description" content="Modern, private, client-side microphone, webcam, and speaker diagnostic tool. Real-time FPS, true RMS dBFS meter, stereo channel balance, frequency sweep, and permissions troubleshooting.">
+  
+  <!-- Content Security Policy: Strict Zero-Telemetry Enforcement -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; connect-src 'none'; font-src 'self'; base-uri 'self'; form-action 'self';">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/visualizers.css">
+  <link rel="stylesheet" href="styles/components.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand-container">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9c.55 0 1-.45 1-1s-.45-1-1-1-1 .45-1 1 .45 1 1 1zm10 0c.55 0 1-.45 1-1s-.45-1-1-1-1 .45-1 1 .45 1 1 1zm-5 5c2.21 0 4-1.79 4-4h-8c0 2.21 1.79 4 4 4z"/>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <h1>Mic & Cam Diagnostics</h1>
+          <span>Hardware Verification & Audio Lab</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="privacy-badge" title="100% client-side WebRTC processing. No data leaves your machine.">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 16l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/>
+          </svg>
+          <span>Zero Telemetry</span>
+        </div>
+
+        <button id="theme-toggle-btn" class="theme-toggle-btn" aria-label="Toggle Dark/Light Mode" title="Toggle Theme">
+          <svg id="theme-icon-sun" viewBox="0 0 24 24">
+            <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/>
+          </svg>
+          <svg id="theme-icon-moon" viewBox="0 0 24 24" style="display: none;">
+            <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <!-- Hero Intro -->
+      <section class="hero-section">
+        <h2 class="hero-title">Diagnostic Suite for Camera, Mic & Audio</h2>
+        <p class="hero-subtitle">
+          Professional-grade in-browser diagnostics with real-time framerate estimation, true RMS dBFS metering, isolated stereo channel verification, and guided troubleshooting.
+        </p>
+      </section>
+
+      <!-- Tab Navigation -->
+      <nav class="tab-navigation" role="tablist">
+        <button class="tab-btn active" data-tab="camera" role="tab" aria-selected="true">
+          <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+          <span>Camera Diagnostics</span>
+        </button>
+
+        <button class="tab-btn" data-tab="microphone" role="tab" aria-selected="false">
+          <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+          <span>Microphone & Audio DSP</span>
+        </button>
+
+        <button class="tab-btn" data-tab="speaker" role="tab" aria-selected="false">
+          <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+          <span>Speaker & Frequency Lab</span>
+        </button>
+
+        <button class="tab-btn" data-tab="troubleshooting" role="tab" aria-selected="false">
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+          <span>Permissions & Guides</span>
+        </button>
+      </nav>
+
+      <!-- ===================================================================
+           TAB 1: Camera Diagnostics Panel
+           =================================================================== -->
+      <section id="tab-camera" class="tab-content active" role="tabpanel">
+        <div class="grid-2">
+          <!-- Video Viewport & Controls -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                Live Camera Feed
+              </h3>
+            </div>
+
+            <!-- Device Selector -->
+            <div class="form-group">
+              <label for="camera-select" class="form-label">Active Camera Device</label>
+              <div class="select-wrapper">
+                <select id="camera-select" class="form-select">
+                  <option value="">Detecting cameras...</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Video Viewport with HUD -->
+            <div class="video-preview-wrapper">
+              <video id="camera-video" class="video-element" playsinline autoplay muted></video>
+
+              <!-- Idle Placeholder -->
+              <div id="video-placeholder" class="video-placeholder">
+                <svg viewBox="0 0 24 24"><path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z"/></svg>
+                <div>
+                  <h4 style="font-weight: 700; margin-bottom: 0.25rem;">Camera Inactive</h4>
+                  <p style="font-size: 0.85rem;">Click "Start Camera" to initiate live video feed.</p>
+                </div>
+              </div>
+
+              <!-- HUD Overlay -->
+              <div class="video-hud-overlay">
+                <div class="hud-pill-group">
+                  <span class="hud-pill">
+                    <span id="hud-live-dot" class="hud-dot"></span>
+                    <span id="hud-res-pill">0x0</span>
+                  </span>
+                </div>
+                <div class="hud-pill-group">
+                  <span id="hud-fps-pill" class="hud-pill">0 FPS</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Camera Action Buttons -->
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <button id="btn-start-camera" class="btn btn-primary">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <span>Start Camera</span>
+              </button>
+              <button id="btn-stop-camera" class="btn btn-secondary" disabled>
+                <svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+                <span>Stop Camera</span>
+              </button>
+            </div>
+
+            <!-- Quick Resolution Selector -->
+            <div>
+              <label class="form-label" style="margin-bottom: 0.5rem;">Request Target Resolution</label>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button class="btn btn-outline btn-sm" data-res-target="3840x2160">4K (3840x2160)</button>
+                <button class="btn btn-outline btn-sm" data-res-target="1920x1080">1080p (1920x1080)</button>
+                <button class="btn btn-outline btn-sm" data-res-target="1280x720">720p (1280x720)</button>
+                <button class="btn btn-outline btn-sm" data-res-target="854x480">480p (854x480)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Video Telemetry & Resolution Prober -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+                Stream Telemetry & Prober
+              </h3>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid-2">
+              <div class="stat-card">
+                <span class="stat-label">Delivered Width</span>
+                <span id="stat-cam-width" class="stat-value highlight">0px</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Delivered Height</span>
+                <span id="stat-cam-height" class="stat-value highlight">0px</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Calculated Aspect Ratio</span>
+                <span id="stat-cam-aspect" class="stat-value">N/A</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Measured FPS (rVFC/EMA)</span>
+                <span id="stat-cam-fps" class="stat-value">0 FPS</span>
+              </div>
+              <div class="stat-card" style="grid-column: 1/-1;">
+                <span class="stat-label">Camera Facing Mode</span>
+                <span id="stat-cam-facing" class="stat-value">Unspecified</span>
+              </div>
+            </div>
+
+            <!-- Supported Resolutions Prober -->
+            <div style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="font-size: 0.95rem; font-weight: 700;">Supported Resolutions Prober</h4>
+                <button id="btn-probe-resolutions" class="btn btn-secondary btn-sm">
+                  <span>Probe All Resolutions</span>
+                </button>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-secondary);">
+                Actively negotiates constraints against camera sensor to verify if 4K, 1080p, and 720p hardware modes are natively supported.
+              </p>
+              <div id="probe-results-grid" class="probe-grid">
+                <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0;">
+                  Click "Probe All Resolutions" to test webcam capabilities.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           TAB 2: Microphone & Audio DSP Panel
+           =================================================================== -->
+      <section id="tab-microphone" class="tab-content" role="tabpanel" hidden>
+        <div class="grid-2">
+          <!-- Audio Visualizers & Meter -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/></svg>
+                Real-Time Audio DSP
+              </h3>
+            </div>
+
+            <!-- Device Selector -->
+            <div class="form-group">
+              <label for="mic-select" class="form-label">Active Microphone Input</label>
+              <div class="select-wrapper">
+                <select id="mic-select" class="form-select">
+                  <option value="">Detecting microphones...</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Time-Domain Oscilloscope Canvas -->
+            <div class="visualizer-container">
+              <span class="visualizer-overlay-label">Oscilloscope (Time-Domain Waveform)</span>
+              <canvas id="canvas-waveform" class="visualizer-canvas"></canvas>
+            </div>
+
+            <!-- Frequency FFT Spectrum Canvas -->
+            <div class="visualizer-container">
+              <span class="visualizer-overlay-label">64-Band FFT Spectrum</span>
+              <canvas id="canvas-spectrum" class="visualizer-canvas"></canvas>
+            </div>
+
+            <!-- Decibel RMS Meter & Clipping -->
+            <div class="meter-wrapper">
+              <div class="meter-header">
+                <span class="meter-title">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3z"/></svg>
+                  True RMS Decibel Meter
+                </span>
+                <div class="meter-stats">
+                  <span id="meter-db-value" class="meter-db-value">-100.0 dBFS</span>
+                  <span id="meter-peak-value">Peak: -100.0 dBFS</span>
+                  <span id="clipping-badge" class="clipping-badge">No Clipping</span>
+                </div>
+              </div>
+
+              <!-- Bar Track -->
+              <div class="db-bar-track">
+                <div id="meter-bar-fill" class="db-bar-fill"></div>
+                <div id="meter-peak-needle" class="db-peak-needle"></div>
+              </div>
+
+              <!-- Scale -->
+              <div class="db-scale-labels">
+                <span>-100 dB</span>
+                <span>-60 dB</span>
+                <span>-40 dB</span>
+                <span>-20 dB</span>
+                <span>-12 dB</span>
+                <span>-6 dB</span>
+                <span>0 dBFS</span>
+              </div>
+            </div>
+
+            <!-- Microphone Actions -->
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <button id="btn-start-mic" class="btn btn-primary">
+                <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/></svg>
+                <span>Start Microphone</span>
+              </button>
+              <button id="btn-stop-mic" class="btn btn-secondary" disabled>
+                <svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+                <span>Stop Microphone</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Loopback Recorder & Hardware Latency -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <svg viewBox="0 0 24 24"><path d="M19 12h-2v3h-3v2h5v-5zM7 9h2V6h3V4H7v5zm10-5H7c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/></svg>
+                Interactive Loopback & Telemetry
+              </h3>
+            </div>
+
+            <!-- Loopback Recorder Box -->
+            <div class="loopback-container">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="font-weight: 700; font-size: 0.95rem;">Record & Replay Loopback Test</h4>
+                <span id="recording-status" style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-secondary);">Idle</span>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                Record a 5-second sample to evaluate your voice clarity, background noise, and acoustic balance without screeching feedback loops.
+              </p>
+
+              <!-- Progress bar -->
+              <div class="audio-progress">
+                <div id="loopback-progress-fill" class="audio-progress-fill"></div>
+              </div>
+
+              <!-- Loopback Controls -->
+              <div class="loopback-controls">
+                <button id="btn-record-loopback" class="btn btn-danger" disabled>
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
+                  <span>Record 5s Test</span>
+                </button>
+                <button id="btn-play-loopback" class="btn btn-success" disabled>
+                  <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  <span>Play Loopback</span>
+                </button>
+                <button id="btn-download-loopback" class="btn btn-secondary btn-sm" disabled>
+                  <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                  <span>Download Audio</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Audio Latency & Pipeline Metrics -->
+            <div style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+              <h4 style="font-weight: 700; font-size: 0.95rem;">Acoustic Pipeline & Latency Diagnostics</h4>
+              <div class="grid-2">
+                <div class="stat-card">
+                  <span class="stat-label">Ambient Noise Floor</span>
+                  <span id="stat-noise-floor" class="stat-value highlight">-80.0 dBFS</span>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-label">Audio Sample Rate</span>
+                  <span id="stat-sample-rate" class="stat-value">48000 Hz</span>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-label">Hardware Base Latency</span>
+                  <span id="stat-latency-base" class="stat-value">0 ms</span>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-label">Total Pipeline Latency</span>
+                  <span id="stat-latency-total" class="stat-value">0 ms</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           TAB 3: Speaker & Frequency Lab Panel
+           =================================================================== -->
+      <section id="tab-speaker" class="tab-content" role="tabpanel" hidden>
+        <div class="grid-2">
+          <!-- Stereo Channel Balance Test -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                Stereo Channel Balance Test
+              </h3>
+            </div>
+
+            <!-- Output Device Selector -->
+            <div class="form-group">
+              <label for="speaker-select" class="form-label">
+                <span>Output Speaker / Headphones</span>
+                <span id="sink-id-badge" class="badge badge-info" style="margin-left: auto;">Checking sinkId support...</span>
+              </label>
+              <div class="select-wrapper">
+                <select id="speaker-select" class="form-select">
+                  <option value="">Default Audio Output Device</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Stereo Visualizer Stage -->
+            <div class="stereo-balance-stage">
+              <!-- Left Channel Box -->
+              <div id="box-speaker-left" class="speaker-channel-box">
+                <div class="speaker-icon-wrapper">
+                  <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z"/></svg>
+                </div>
+                <span class="speaker-label">LEFT CHANNEL</span>
+                <span class="speaker-desc">Isolated 440Hz Sine</span>
+              </div>
+
+              <!-- Right Channel Box -->
+              <div id="box-speaker-right" class="speaker-channel-box">
+                <div class="speaker-icon-wrapper">
+                  <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z"/></svg>
+                </div>
+                <span class="speaker-label">RIGHT CHANNEL</span>
+                <span class="speaker-desc">Isolated 440Hz Sine</span>
+              </div>
+            </div>
+
+            <!-- Channel Trigger Buttons -->
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <button id="btn-play-left" class="btn btn-primary">
+                <span>Play Left Only</span>
+              </button>
+              <button id="btn-play-right" class="btn btn-primary">
+                <span>Play Right Only</span>
+              </button>
+              <button id="btn-play-both" class="btn btn-secondary">
+                <span>Play Both Channels</span>
+              </button>
+              <button id="btn-stop-tone" class="btn btn-outline" disabled>
+                <span>Stop Tone</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 20Hz - 20,000Hz Frequency Sweeper -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                20Hz - 20kHz Frequency Sweeper
+              </h3>
+            </div>
+
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+              Generates a continuous logarithmic audio frequency sweep across the full human auditory spectrum (20Hz bass to 20,000Hz treble) to diagnose speaker distortion and driver response.
+            </p>
+
+            <!-- Sweep Visualizer -->
+            <div class="sweep-container">
+              <div class="sweep-readout">
+                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Instantaneous Frequency</span>
+                <span id="sweep-freq-display" class="sweep-freq-display">20 Hz</span>
+              </div>
+
+              <div class="sweep-progress-track">
+                <div id="sweep-progress-bar" class="sweep-progress-bar"></div>
+              </div>
+
+              <div class="sweep-frequency-ticks">
+                <span>20 Hz</span>
+                <span>100 Hz</span>
+                <span>500 Hz</span>
+                <span>1 kHz</span>
+                <span>5 kHz</span>
+                <span>10 kHz</span>
+                <span>20 kHz</span>
+              </div>
+            </div>
+
+            <!-- Sweep Actions -->
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <button id="btn-start-sweep" class="btn btn-primary">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <span>Start 10s Sweep</span>
+              </button>
+              <button id="btn-stop-sweep" class="btn btn-secondary" disabled>
+                <svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+                <span>Stop Sweep</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           TAB 4: Permissions & Troubleshooting Hub Panel
+           =================================================================== -->
+      <section id="tab-troubleshooting" class="tab-content" role="tabpanel" hidden>
+        <div class="card troubleshooting-hub">
+          <div class="card-header">
+            <h3 class="card-title">
+              <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 16l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/></svg>
+              Permissions & Hardware Troubleshooting Hub
+            </h3>
+            <div style="display: flex; gap: 0.5rem;">
+              <span class="badge badge-info">Camera: <strong id="perm-status-cam" style="margin-left: 4px;">Checking...</strong></span>
+              <span class="badge badge-info">Microphone: <strong id="perm-status-mic" style="margin-left: 4px;">Checking...</strong></span>
+            </div>
+          </div>
+
+          <p style="font-size: 0.9rem; color: var(--text-secondary);">
+            If your camera or microphone is not working, select your browser or operating system below to follow step-by-step unblocking and configuration instructions:
+          </p>
+
+          <!-- Filter Pills -->
+          <div class="filter-pills">
+            <button class="filter-pill active" data-filter="chrome">Chrome / Chromium</button>
+            <button class="filter-pill" data-filter="firefox">Firefox</button>
+            <button class="filter-pill" data-filter="safari">Safari</button>
+            <button class="filter-pill" data-filter="edge">Microsoft Edge</button>
+            <button class="filter-pill" data-filter="windows">Windows</button>
+            <button class="filter-pill" data-filter="macOS">macOS</button>
+            <button class="filter-pill" data-filter="linux">Linux</button>
+          </div>
+
+          <!-- Troubleshooting Dynamic Guide Container -->
+          <div id="troubleshooting-container"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-left">
+        <span>© 2026 Mic & Cam Diagnostic Utility</span>
+        <span>•</span>
+        <span>Standalone Client-Side Architecture (HTML5 / WebRTC / Web Audio)</span>
+      </div>
+      <div class="footer-links">
+        <span class="badge badge-success">🔒 Zero Telemetry Guarantee</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modular Application Bootstrap -->
+  <script type="module" src="scripts/app.js"></script>
+</body>
+</html>
